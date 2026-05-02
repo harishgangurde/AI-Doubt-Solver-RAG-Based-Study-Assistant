@@ -1,0 +1,23 @@
+# Frontend
+streamlit==1.35.0
+streamlit-chat==0.1.1
+streamlit-extras==0.4.2
+
+# LLM & RAG
+langchain==0.2.6
+langchain-community==0.2.6
+langchain-groq==0.1.6
+groq==0.9.0
+
+# Embeddings (free, local, no API key)
+sentence-transformers==2.7.0
+
+# PDF Processing (prebuilt wheel, no Visual Studio needed)
+pymupdf==1.24.5
+
+# Database
+supabase==2.5.0
+
+# Utilities
+python-dotenv==1.0.1
+pydantic==2.7.4
