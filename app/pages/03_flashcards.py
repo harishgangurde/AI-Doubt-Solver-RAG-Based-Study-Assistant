@@ -1,17 +1,88 @@
+import streamlit as st
+st.set_page_config(page_title="Flashcards", page_icon="🃏", layout="wide")
+
 import sys
 sys.path.insert(0, '.')
 
-import streamlit as st
 from app.utils.helpers import init_session_state, require_login, require_document
 from app.components.sidebar import show_sidebar
 from app.core.quiz_generator import generate_flashcards
 from app.database.vector_store import search_similar_chunks
 
-st.set_page_config(page_title="Flashcards", page_icon="🃏", layout="wide")
-
 init_session_state()
 require_login()
 show_sidebar()
+
+st.markdown("""
+<style>
+.flashcard-front {
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+    border: 2px solid #7c6aff;
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(124, 106, 255, 0.3);
+    margin: 10px 0;
+}
+.flashcard-back {
+    background: linear-gradient(135deg, #0d2818, #1a3a2a);
+    border: 2px solid #6affb8;
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(106, 255, 184, 0.3);
+    margin: 10px 0;
+}
+.card-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+.card-term {
+    font-size: 28px;
+    font-weight: 700;
+    color: #e8e8f0;
+    line-height: 1.3;
+}
+.card-def {
+    font-size: 18px;
+    color: #c8f0dc;
+    line-height: 1.6;
+}
+.card-hint {
+    font-size: 12px;
+    color: #555570;
+    margin-top: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.progress-text {
+    font-size: 13px;
+    color: #8888aa;
+    text-align: center;
+    margin-bottom: 8px;
+}
+.card-counter {
+    font-size: 22px;
+    font-weight: 800;
+    color: #e8e8f0;
+    text-align: center;
+    margin-bottom: 4px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 st.title("🃏 Flashcards")
 st.markdown("Review key concepts with AI-generated flashcards.")
@@ -55,48 +126,66 @@ with col2:
         idx = st.session_state.current_card_index
         flipped = st.session_state.card_flipped
         total = len(cards)
-
-        st.subheader(f"Card {idx + 1} of {total}")
-        st.progress((idx + 1) / total)
-
         card = cards[idx]
+
+        # Progress bar
+        progress = (idx + 1) / total
+        st.markdown(f'<div class="card-counter">Card {idx+1} of {total}</div>', unsafe_allow_html=True)
+        st.progress(progress)
 
         # Card display
         if not flipped:
-            st.info(f"### 🔵 {card['front']}")
-            st.caption("Click 'Flip' to see the answer")
+            st.markdown(f"""
+            <div class="flashcard-front">
+                <div class="card-label" style="color:#7c6aff;">📘 TERM</div>
+                <div class="card-term">{card['front']}</div>
+                <div class="card-hint">Click Flip to see the answer ↓</div>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.success(f"### 🟢 {card['back']}")
-            st.caption("Click 'Next' for the next card")
+            st.markdown(f"""
+            <div class="flashcard-back">
+                <div class="card-label" style="color:#6affb8;">✅ ANSWER</div>
+                <div class="card-def">{card['back']}</div>
+                <div class="card-hint">Click Next for the next card →</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
         # Controls
         c1, c2, c3 = st.columns(3)
-
         with c1:
-            if st.button("⬅️ Previous", use_container_width=True):
+            if st.button("⬅️ Previous", use_container_width=True, disabled=(idx == 0)):
                 st.session_state.current_card_index = max(0, idx - 1)
                 st.session_state.card_flipped = False
                 st.rerun()
-
         with c2:
             if st.button("🔄 Flip", use_container_width=True, type="primary"):
                 st.session_state.card_flipped = not flipped
                 st.rerun()
-
         with c3:
-            if st.button("➡️ Next", use_container_width=True):
-                if idx + 1 < total:
+            if idx + 1 < total:
+                if st.button("Next ➡️", use_container_width=True):
                     st.session_state.current_card_index = idx + 1
                     st.session_state.card_flipped = False
                     st.rerun()
-                else:
-                    st.success("🎉 You've reviewed all cards!")
+            else:
+                if st.button("🎉 Restart", use_container_width=True):
+                    st.session_state.current_card_index = 0
+                    st.session_state.card_flipped = False
+                    st.rerun()
 
         st.markdown("---")
 
         # All cards overview
         with st.expander("📋 View all cards"):
             for i, c in enumerate(cards):
-                st.markdown(f"**{i+1}. {c['front']}**")
+                active = "🟣" if i == idx else "⚪"
+                st.markdown(f"**{active} {i+1}. {c['front']}**")
                 st.markdown(f"→ {c['back']}")
-                st.markdown("")
+                if st.button(f"Jump to card {i+1}", key=f"jump_{i}"):
+                    st.session_state.current_card_index = i
+                    st.session_state.card_flipped = False
+                    st.rerun()
+                st.markdown("---")

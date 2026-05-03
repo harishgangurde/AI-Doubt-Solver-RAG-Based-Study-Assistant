@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer
 from app.database.supabase_client import get_supabase_admin
 import streamlit as st
 
-@st.cache_resource(show_spinner="Loading AI model...")
+@st.cache_resource(show_spinner=False)
 def load_embedding_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
 

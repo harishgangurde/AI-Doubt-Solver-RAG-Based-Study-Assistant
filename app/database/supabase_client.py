@@ -1,7 +1,7 @@
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import os
 import streamlit as st
+import os
 
 load_dotenv()
 

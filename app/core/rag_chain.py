@@ -19,28 +19,38 @@ def get_llm():
     )
 
 def answer_doubt(question: str, user_id: str, document_id: str, chat_history: list = []) -> str:
-    chunks = search_similar_chunks(question, user_id, document_id, top_k=5)
+    
+    # Handle conversational messages — don't do RAG for these
+    conversational = ["okay", "thanks", "thank you", "ok", "got it", "sure", 
+                      "alright", "cool", "nice", "great", "bye", "hello", "hi"]
+    
+    if question.lower().strip().rstrip("!.,") in conversational:
+        return "You're welcome! 😊 Feel free to ask any more doubts from your document."
 
+    chunks = search_similar_chunks(question, user_id, document_id, top_k=5)
     if not chunks:
         return "I couldn't find relevant information in your document. Try rephrasing your question."
 
     context = "\n\n".join([chunk["content"] for chunk in chunks])
 
-    system_prompt = f"""You are a helpful AI tutor. Answer the student's question using ONLY the context provided from their study material.
+    system_prompt = f"""You are a helpful AI tutor. Answer the student's LATEST question only.
 
-Context from the document:
-{context}
+    Context from the document:
+    {context}
 
-Rules:
-- Answer clearly and in simple language
-- If the answer is not in the context, say "This topic is not covered in the uploaded document"
-- Use bullet points or numbered steps when explaining concepts
-- Keep answers concise but complete
-"""
+    Rules:
+    - Answer ONLY the latest question asked
+    - Do NOT repeat or re-answer previous questions from history
+    - Answer clearly and in simple language
+    - If not in context, say "This topic is not covered in the uploaded document"
+    - Use bullet points when explaining concepts
+    - Keep answers concise but complete
+    """
 
     messages = [SystemMessage(content=system_prompt)]
 
-    for msg in chat_history[-8:]:
+    # Only send last 4 exchanges for memory, not entire history
+    for msg in chat_history[-6:]:
         if msg["role"] == "user":
             messages.append(HumanMessage(content=msg["content"]))
         else:

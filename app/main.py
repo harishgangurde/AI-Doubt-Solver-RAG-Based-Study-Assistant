@@ -16,6 +16,10 @@ st.set_page_config(
 
 def main():
     init_session_state()
+    # Preload model in background while user is on login screen
+    from app.database.vector_store import load_embedding_model
+    with st.spinner(""):
+        load_embedding_model()  # cached — only runs once ever
 
     if not is_logged_in():
         show_auth_page()
