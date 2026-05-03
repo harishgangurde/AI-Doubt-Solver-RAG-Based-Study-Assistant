@@ -21,3 +21,4 @@ supabase==2.5.0
 # Utilities
 python-dotenv==1.0.1
 pydantic==2.7.4
+pydantic-core==2.18.4
