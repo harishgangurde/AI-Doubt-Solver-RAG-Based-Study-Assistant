@@ -99,26 +99,26 @@ Upload your PDF → Ask doubts → Get answers from your document → Practice w
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Student Browser                       │
-│              (Streamlit Multi-page App)                  │
+│                    Student Browser                      │
+│              (Streamlit Multi-page App)                 │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
-┌─────────────────────────────────────────────────────────┐
-│                  Python Backend                          │
-│                                                          │
+┌────────────────────────────────────────────────────────┐
+│                  Python Backend                        │
+│                                                        │
 │  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
 │  │PDF Processor│  │  RAG Chain   │  │Quiz Generator │  │
 │  │  (PyMuPDF)  │  │ (LangChain)  │  │  (LangChain)  │  │
 │  └──────┬──────┘  └──────┬───────┘  └───────┬───────┘  │
-│         │                │                   │          │
-└─────────┼────────────────┼───────────────────┼──────────┘
+│         │                │                   │         │
+└─────────┼────────────────┼───────────────────┼─────────┘
           │                │                   │
           ▼                ▼                   ▼
 ┌─────────────────┐  ┌──────────┐    ┌─────────────────┐
-│  Supabase DB    │  │ Groq API │    │ HuggingFace      │
-│  (PostgreSQL    │  │ LLaMA    │    │ Sentence         │
-│  + pgvector)    │  │ 3.3 70B  │    │ Transformers     │
+│  Supabase DB    │  │ Groq API │    │ HuggingFace     │
+│  (PostgreSQL    │  │ LLaMA    │    │ Sentence        │
+│  + pgvector)    │  │ 3.3 70B  │    │ Transformers    │
 └─────────────────┘  └──────────┘    └─────────────────┘
 ```
 
@@ -384,7 +384,7 @@ http://localhost:8501
 
 | Page | URL | Description |
 |---|---|---|
-| Home | `/` | Upload PDFs, manage documents, select active document |
+| Home | `/home` | Upload PDFs, manage documents, select active document |
 | Doubt Solver | `/doubt_solver` | Ask questions, get AI answers from your document |
 | Quiz | `/quiz` | Generate MCQs, submit answers, see score and explanations |
 | Flashcards | `/flashcards` | Flip card review with progress tracking |
@@ -428,7 +428,7 @@ Enter a topic. The LLM generates key term-definition pairs from the document con
 - [ ] Collaborative study rooms (multiple students, shared documents)
 - [ ] Voice input for asking doubts
 - [ ] Export quiz results as PDF report
-- [ ] Mobile app using React Native
+- [ ] Mobile app using Flutter
 - [ ] Admin dashboard for teachers to upload material for students
 - [ ] Integration with Google Classroom / LMS platforms
 - [ ] Multi-language support
